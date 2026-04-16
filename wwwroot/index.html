@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABC Pharmacy Medicine Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>ABC Pharmacy - Medicine Tracker</h1>
+    <p class="subtitle">Track medicine inventory and medicine sale records.</p>
+    <div id="status" class="status"></div>
+
+    <section class="card">
+      <h2>Add Medicine</h2>
+      <form id="medicineForm">
+        <div class="form-grid">
+          <label>
+            Full Name
+            <input type="text" name="fullName" required />
+          </label>
+          <label>
+            Brand
+            <input type="text" name="brand" required />
+          </label>
+          <label>
+            Expiry Date
+            <input type="date" name="expiryDate" required />
+          </label>
+          <label>
+            Quantity
+            <input type="number" name="quantity" min="0" required />
+          </label>
+          <label>
+            Price
+            <input type="number" name="price" min="0" step="0.01" required />
+          </label>
+          <label class="full-width">
+            Notes
+            <textarea name="notes" rows="3" placeholder="Optional notes"></textarea>
+          </label>
+        </div>
+        <button type="submit">Add Medicine</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Medicine Inventory</h2>
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="Search by medicine name" />
+        <button id="searchButton" type="button">Search</button>
+        <button id="clearSearchButton" type="button" class="secondary">Clear</button>
+      </div>
+      <div class="table-wrap">
+        <table id="medicineTable">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Expiry Date</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Brand</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="legend">
+        <span class="chip red">Red</span> Expiry date within 30 days
+        <span class="chip yellow">Yellow</span> Stock below 10
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Record Sale</h2>
+      <form id="saleForm">
+        <div class="form-grid">
+          <label>
+            Medicine
+            <select id="saleMedicineId" name="medicineId" required></select>
+          </label>
+          <label>
+            Quantity Sold
+            <input type="number" name="quantitySold" min="1" required />
+          </label>
+        </div>
+        <button type="submit">Save Sale</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Sale Records</h2>
+      <div class="table-wrap">
+        <table id="salesTable">
+          <thead>
+            <tr>
+              <th>Sold At (UTC)</th>
+              <th>Medicine</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
