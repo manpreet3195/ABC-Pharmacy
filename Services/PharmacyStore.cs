@@ -1,9 +1,11 @@
 using System.Text.Json;
 using ABCPharmacy.Models;
+using ABCPharmacy.Options;
+using Microsoft.Extensions.Options;
 
 namespace ABCPharmacy.Services;
 
-public sealed class PharmacyStore
+public sealed class PharmacyStore : IPharmacyStore  
 {
     private readonly string _medicinesFilePath;
     private readonly string _salesFilePath;
@@ -11,111 +13,100 @@ public sealed class PharmacyStore
     {
         WriteIndented = true
     };
-    private readonly SemaphoreSlim _gate = new(1, 1);
 
-    public PharmacyStore(IHostEnvironment env)
+    public PharmacyStore(IHostEnvironment env, IOptions<JsonStoreOptions> options)
     {
-        var dataDirectory = Path.Combine(env.ContentRootPath, "App_Data");
-        Directory.CreateDirectory(dataDirectory);
-        _medicinesFilePath = Path.Combine(dataDirectory, "medicines.json");
-        _salesFilePath = Path.Combine(dataDirectory, "sales.json");
+        var configured = options.Value;
+        _medicinesFilePath = ResolveFilePath(env.ContentRootPath, configured.MedicinesFilePath);
+        _salesFilePath = ResolveFilePath(env.ContentRootPath, configured.SalesFilePath);
+
+        EnsureStorageFile(_medicinesFilePath);
+        EnsureStorageFile(_salesFilePath);
     }
 
     public async Task<List<Medicine>> GetMedicinesAsync()
     {
-        await _gate.WaitAsync();
-        try
-        {
-            return await ReadListAsync<Medicine>(_medicinesFilePath);
-        }
-        finally
-        {
-            _gate.Release();
-        }
+        return await ReadListAsync<Medicine>(_medicinesFilePath);
     }
 
     public async Task<Medicine> AddMedicineAsync(Medicine medicine)
     {
-        await _gate.WaitAsync();
-        try
-        {
-            var medicines = await ReadListAsync<Medicine>(_medicinesFilePath);
-            medicine.Id = Guid.NewGuid();
-            medicine.Price = Math.Round(medicine.Price, 2);
-            medicines.Add(medicine);
-            await WriteListAsync(_medicinesFilePath, medicines);
-            return medicine;
-        }
-        finally
-        {
-            _gate.Release();
-        }
+        var medicines = await ReadListAsync<Medicine>(_medicinesFilePath);
+        medicine.Id = Guid.NewGuid();
+        medicine.Price = Math.Round(medicine.Price, 2);
+        medicines.Add(medicine);
+        await WriteListAsync(_medicinesFilePath, medicines);
+        return medicine;
     }
 
     public async Task<List<SaleRecord>> GetSalesAsync()
     {
-        await _gate.WaitAsync();
-        try
-        {
-            return await ReadListAsync<SaleRecord>(_salesFilePath);
-        }
-        finally
-        {
-            _gate.Release();
-        }
+        return await ReadListAsync<SaleRecord>(_salesFilePath);
     }
 
     public async Task<SaleRecord> RecordSaleAsync(Guid medicineId, int quantitySold)
     {
-        await _gate.WaitAsync();
-        try
+        var medicines = await ReadListAsync<Medicine>(_medicinesFilePath);
+        var medicine = medicines.FirstOrDefault(m => m.Id == medicineId);
+
+        if (medicine is null)
         {
-            var medicines = await ReadListAsync<Medicine>(_medicinesFilePath);
-            var medicine = medicines.FirstOrDefault(m => m.Id == medicineId);
-
-            if (medicine is null)
-            {
-                throw new KeyNotFoundException("Medicine not found.");
-            }
-
-            if (medicine.Quantity < quantitySold)
-            {
-                throw new InvalidOperationException("Insufficient stock for this sale.");
-            }
-
-            medicine.Quantity -= quantitySold;
-            await WriteListAsync(_medicinesFilePath, medicines);
-
-            var sales = await ReadListAsync<SaleRecord>(_salesFilePath);
-            var sale = new SaleRecord
-            {
-                Id = Guid.NewGuid(),
-                MedicineId = medicine.Id,
-                MedicineName = medicine.FullName,
-                QuantitySold = quantitySold,
-                UnitPrice = Math.Round(medicine.Price, 2),
-                SoldAt = DateTime.UtcNow
-            };
-
-            sales.Add(sale);
-            await WriteListAsync(_salesFilePath, sales);
-
-            return sale;
+            throw new KeyNotFoundException("Medicine not found.");
         }
-        finally
+
+        if (medicine.Quantity < quantitySold)
         {
-            _gate.Release();
+            throw new InvalidOperationException("Insufficient stock for this sale.");
+        }
+
+        medicine.Quantity -= quantitySold;
+        await WriteListAsync(_medicinesFilePath, medicines);
+
+        var sales = await ReadListAsync<SaleRecord>(_salesFilePath);
+        var sale = new SaleRecord
+        {
+            Id = Guid.NewGuid(),
+            MedicineId = medicine.Id,
+            MedicineName = medicine.FullName,
+            QuantitySold = quantitySold,
+            UnitPrice = Math.Round(medicine.Price, 2),
+            SoldAt = DateTime.UtcNow
+        };
+
+        sales.Add(sale);
+        await WriteListAsync(_salesFilePath, sales);
+
+        return sale;
+    }
+
+    private static string ResolveFilePath(string contentRootPath, string configuredPath)
+    {
+        if (string.IsNullOrWhiteSpace(configuredPath))
+        {
+            throw new InvalidOperationException("JSON store file path cannot be empty.");
+        }
+
+        return Path.IsPathRooted(configuredPath)
+            ? configuredPath
+            : Path.GetFullPath(Path.Combine(contentRootPath, configuredPath));
+    }
+
+    private static void EnsureStorageFile(string filePath)
+    {
+        var directory = Path.GetDirectoryName(filePath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        if (!File.Exists(filePath))
+        {
+            File.WriteAllText(filePath, "[]");
         }
     }
 
     private async Task<List<T>> ReadListAsync<T>(string filePath)
     {
-        if (!File.Exists(filePath))
-        {
-            await File.WriteAllTextAsync(filePath, "[]");
-            return new List<T>();
-        }
-
         await using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         var records = await JsonSerializer.DeserializeAsync<List<T>>(stream, _jsonOptions);
         return records ?? new List<T>();

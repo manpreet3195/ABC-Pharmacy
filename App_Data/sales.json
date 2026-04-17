@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "id": "0a57b5b6-689a-4130-8b61-90dfa5026f6b",
+    "medicineId": "a2deb5f2-2473-4f5d-821f-49b51b138da6",
+    "medicineName": "miracle medicene",
+    "quantitySold": 1,
+    "unitPrice": 500,
+    "soldAt": "2026-04-17T05:21:50.5214279Z"
+  },
+  {
+    "id": "729af315-d5bd-4066-99ce-63d2f0c66894",
+    "medicineId": "a2deb5f2-2473-4f5d-821f-49b51b138da6",
+    "medicineName": "miracle medicene",
+    "quantitySold": 1,
+    "unitPrice": 500,
+    "soldAt": "2026-04-17T05:22:16.1063781Z"
+  },
+  {
+    "id": "2736c0ce-aa01-480b-92e4-1e74b652cba5",
+    "medicineId": "a2deb5f2-2473-4f5d-821f-49b51b138da6",
+    "medicineName": "miracle medicene",
+    "quantitySold": 1,
+    "unitPrice": 500,
+    "soldAt": "2026-04-17T05:22:16.206695Z"
+  },
+  {
+    "id": "c9c9ccb8-0898-42f6-b698-31350c145c36",
+    "medicineId": "a2deb5f2-2473-4f5d-821f-49b51b138da6",
+    "medicineName": "miracle medicene",
+    "quantitySold": 1,
+    "unitPrice": 500,
+    "soldAt": "2026-04-17T05:22:16.4593115Z"
+  },
+  {
+    "id": "8535f8fd-4b1b-4942-bd90-802c617fde08",
+    "medicineId": "a2deb5f2-2473-4f5d-821f-49b51b138da6",
+    "medicineName": "miracle medicene",
+    "quantitySold": 1,
+    "unitPrice": 500,
+    "soldAt": "2026-04-17T05:22:16.5647395Z"
+  },
+  {
+    "id": "4fed829d-097a-4325-a57d-5e1af93acc8b",
+    "medicineId": "a2deb5f2-2473-4f5d-821f-49b51b138da6",
+    "medicineName": "miracle medicene",
+    "quantitySold": 1,
+    "unitPrice": 500,
+    "soldAt": "2026-04-17T05:22:16.8391575Z"
+  }
+]

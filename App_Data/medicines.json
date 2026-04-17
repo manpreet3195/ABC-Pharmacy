@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "a2deb5f2-2473-4f5d-821f-49b51b138da6",
+    "fullName": "miracle medicene",
+    "notes": "",
+    "expiryDate": "2026-04-16T00:00:00",
+    "quantity": 4,
+    "price": 500,
+    "brand": "MS"
+  },
+  {
+    "id": "fafde792-7bf1-4a9f-8e44-55caae7f6880",
+    "fullName": "facewash",
+    "notes": "",
+    "expiryDate": "2026-06-12T00:00:00",
+    "quantity": 5,
+    "price": 20,
+    "brand": "himlya"
+  }
+]
